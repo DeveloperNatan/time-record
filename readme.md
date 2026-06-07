@@ -40,7 +40,7 @@ A API disponibiliza documentação interativa via Swagger, permitindo visualizar
 
 URL publicada:
 
-    Swagger da aplicação(https://timerecord-dev-b5cwhmadgrguhvb6.brazilsouth-01.azurewebsites.net/swagger/index.html)
+    [Swagger da aplicação](https://timerecord-dev-b5cwhmadgrguhvb6.brazilsouth-01.azurewebsites.net/swagger/index.html)
 
 Como boa prática, Swagger em produção deve ser avaliado com cuidado e, em cenários mais rígidos, protegido ou limitado por ambiente, autenticação ou regra de acesso.
 Docker
