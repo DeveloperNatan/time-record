@@ -40,7 +40,7 @@ A API disponibiliza documentação interativa via Swagger, permitindo visualizar
 
 URL publicada:
 
-    Swagger da aplicação
+    Swagger da aplicação(https://timerecord-dev-b5cwhmadgrguhvb6.brazilsouth-01.azurewebsites.net/swagger/index.html)
 
 Como boa prática, Swagger em produção deve ser avaliado com cuidado e, em cenários mais rígidos, protegido ou limitado por ambiente, autenticação ou regra de acesso.
 Docker
@@ -57,7 +57,6 @@ O uso de Docker neste projeto traz benefícios práticos:
 
     caminho mais simples para deploy em serviços gerenciados do Azure.
 
-Em termos de portfólio técnico, isso evidencia conhecimento em containerização de aplicações .NET e em fluxo de entrega baseado em imagens, o que é relevante para vagas com viés DevOps, backend moderno e platform engineering.
 GitHub Actions
 
 O projeto utiliza GitHub Actions para automação de etapas do ciclo de entrega. Workflows do GitHub Actions permitem reagir a eventos como pull_request e push, executando testes, build e publicação de artefatos automaticamente.
@@ -102,31 +101,6 @@ Esse desenho reforça conceitos importantes para quem avalia o projeto:
     possibilidade de escalar ou trocar a camada de banco de forma independente;
 
     alinhamento com arquitetura cloud-native.
-
-Valor técnico do projeto
-
-Este projeto não demonstra apenas conhecimento em desenvolvimento backend com .NET. Ele também evidencia uma preocupação prática com containerização, automação de build e entrega, integração com serviços externos e publicação em cloud.
-
-Para recrutadores e times técnicos, isso destaca competências relevantes como:
-
-    desenvolvimento de API REST em ASP.NET Core;
-
-    uso de banco gerenciado externo;
-
-    empacotamento com Docker;
-
-    automação com GitHub Actions;
-
-    deploy de contêiner no Azure.
-
-Estrutura resumida do fluxo de entrega
-Etapa	Ferramenta	Objetivo
-Build da aplicação	.NET / Docker	Empacotar a API em imagem executável
-Automação	GitHub Actions	Executar pipeline e publicar imagem
-Registro de imagem	Docker Hub	Armazenar versões da imagem
-Banco de dados	PostgreSQL (Neon)	Persistência externa da aplicação
-Hospedagem	Azure	Executar o contêiner em cloud
-Endpoints e uso
 
 A documentação interativa da API está disponível no Swagger publicado em produção, o que facilita testes, inspeção de contratos e validação rápida dos recursos disponíveis.
 
