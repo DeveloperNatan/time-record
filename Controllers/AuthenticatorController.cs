@@ -13,7 +13,7 @@ namespace TimeRecord.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> ValidateUserAsync(LoginDto requestLoginDto)
         {
-            var validatedUser = await authService.GenerateToken(requestLoginDto.Email, requestLoginDto.PasswordHash);
+            var validatedUser = await authService.LoginUserToken(requestLoginDto.Email, requestLoginDto.PasswordHash);
             return Ok(validatedUser);
         }
         

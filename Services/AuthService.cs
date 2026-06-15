@@ -14,7 +14,7 @@ namespace TimeRecord.Services;
 
 public class AuthService(AppDbContext appDbContext)
 {
-    public async Task<Token> GenerateToken(string email, string password)
+    public async Task<Token> LoginUserToken(string email, string password)
     {
         var userDb = await appDbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
         if (userDb == null)
