@@ -12,7 +12,7 @@ using TimeRecord.Models;
 
 namespace TimeRecord.Services;
 
-public class AuthService(AppDbContext appDbContext)
+public class UserService(AppDbContext appDbContext)
 {
     public async Task<Token> LoginUserToken(string email, string password)
     {
@@ -81,38 +81,91 @@ public class AuthService(AppDbContext appDbContext)
     }
 
 
-    public async Task<AuthResponseTokenDTO> CreateUserAsync(LoginDto dataDto)
+   public async Task<UsersResponseTokenDTO> CreateUserAsync(CreateUserDto dataDto)
+{
+    var existingEmail = await appDbContext.Users
+        .AnyAsync(e => e.Email == dataDto.Email);
+
+    if (existingEmail)
+        throw new ValidationException("This Email can't be used");
+
+    await using var transaction = await appDbContext.Database.BeginTransactionAsync();
+
+    try
     {
-        var existingEmail = await appDbContext.Users.AnyAsync(e => e.Email == dataDto.Email);
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(dataDto.Password);
 
-        if (existingEmail)
-        {
-            throw new ValidationException("This Email can't be used");
-        }
-
-        dataDto.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dataDto.PasswordHash);
-
-        var createdEmail = new Users()
+        var createdUser = new Users
         {
             Email = dataDto.Email,
-            PasswordHash = dataDto.PasswordHash,
+            PasswordHash = passwordHash,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
 
-        await appDbContext.Users.AddAsync(createdEmail);
+        await appDbContext.Users.AddAsync(createdUser);
+        Console.Write(createdUser.Id);
         await appDbContext.SaveChangesAsync();
 
+        if (dataDto.ProfileType == UserProfileType.Employee)
+        {
+            if (string.IsNullOrWhiteSpace(dataDto.Name))
+                throw new ValidationException("Name is required for employee");
 
-        var response = new AuthResponseTokenDTO()
+            if (string.IsNullOrWhiteSpace(dataDto.Job))
+                throw new ValidationException("Job is required for employee");
+
+            if (!dataDto.Matriculation.HasValue)
+                throw new ValidationException("Matriculation is required for employee");
+
+            var employee = new Employee()
+            {
+                Name = dataDto.Name,
+                Job = dataDto.Job,
+                Matriculation = dataDto.Matriculation.Value,
+                UserId = createdUser.Id,
+                CompanyId = 2,
+            };
+
+            await appDbContext.Employees.AddAsync(employee);
+        }
+        else if (dataDto.ProfileType == UserProfileType.Company)
+        {
+            if (string.IsNullOrWhiteSpace(dataDto.CompanyName))
+                throw new ValidationException("CompanyName is required for company");
+
+            var company = new Companies
+            {
+                Name = dataDto.CompanyName,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                UserId = createdUser.Id
+            };
+
+            await appDbContext.Companies.AddAsync(company);
+        }
+        else
+        {
+            throw new ValidationException("Invalid profile type");
+        }
+
+        await appDbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        return new UsersResponseTokenDTO()
         {
             StatusCode = 201,
             Message = "User created successfully",
             Authentication = true,
         };
-
-        return response;
     }
+    catch
+    {
+        await transaction.RollbackAsync();
+        throw;
+    }
+}
 
     public async Task<IEnumerable<Users>> GetUserAsync()
     {
@@ -121,7 +174,7 @@ public class AuthService(AppDbContext appDbContext)
     }
 
 
-    public async Task<AuthResponseDTO> UpdateUserAsync(LoginDto dataDto, int id)
+    public async Task<UsersResponseDTO> UpdateUserAsync(LoginDto dataDto, int id)
     {
         var updatedUser = await appDbContext.Users.FindAsync(id);
         if (updatedUser == null)
@@ -142,7 +195,7 @@ public class AuthService(AppDbContext appDbContext)
 
         await appDbContext.SaveChangesAsync();
 
-        var response = new AuthResponseDTO()
+        var response = new UsersResponseDTO()
         {
             Email = updatedUser.Email,
             UpdatedAt = updatedUser.UpdatedAt,
@@ -151,7 +204,7 @@ public class AuthService(AppDbContext appDbContext)
         return response;
     }
 
-    public async Task<AuthMessageDto> DeleteUserAsync(int id)
+    public async Task<UsersMessageDto> DeleteUserAsync(int id)
     {
         var deleted = await appDbContext.Users.FindAsync(id);
         if (deleted == null)
@@ -163,7 +216,7 @@ public class AuthService(AppDbContext appDbContext)
         await appDbContext.SaveChangesAsync();
 
 
-        var response = new AuthMessageDto()
+        var response = new UsersMessageDto()
         {
             StatusCode = 200,
             Message = "User Deleted successfully",

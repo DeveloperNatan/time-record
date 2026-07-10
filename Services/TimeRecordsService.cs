@@ -24,7 +24,7 @@ namespace TimeRecord.Services
             var timeRecords = new TimeRecords()
             {
                 EmployeeId = employee.Id,
-                CompanyId = employee.CompanyId,
+                // CompanyId = employee.CompanyId,
                 RecordedAt = DateTime.UtcNow,
             };
 

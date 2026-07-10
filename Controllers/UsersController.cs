@@ -8,19 +8,19 @@ namespace TimeRecord.Controllers
 {
     [ApiController]
     [Route("api/auth/")]
-    public class AuthenticatorController(AuthService authService, AppDbContext appDbContext) : ControllerBase
+    public class UsersController(UserService userService, AppDbContext appDbContext) : ControllerBase
     {
         [HttpPost("login")]
         public async Task<IActionResult> ValidateUserAsync(LoginDto requestLoginDto)
         {
-            var validatedUser = await authService.LoginUserToken(requestLoginDto.Email, requestLoginDto.PasswordHash);
+            var validatedUser = await userService.LoginUserToken(requestLoginDto.Email, requestLoginDto.PasswordHash);
             return Ok(validatedUser);
         }
         
         [HttpPost("register")]
-        public async Task<IActionResult> CreateAsync(LoginDto requestLoginDto)
+        public async Task<IActionResult> CreateAsync(CreateUserDto requestLoginDto)
         {
-            var userCreated = await authService.CreateUserAsync(requestLoginDto);
+            var userCreated = await userService.CreateUserAsync(requestLoginDto);
             return Ok(userCreated);
         }
 
@@ -29,7 +29,7 @@ namespace TimeRecord.Controllers
         [Authorize]
         public async Task<IActionResult> GetAsync()
         {
-            var allUsers = await authService.GetUserAsync();
+            var allUsers = await userService.GetUserAsync();
             return Ok(allUsers);
         }
 
@@ -37,7 +37,7 @@ namespace TimeRecord.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateAsync(LoginDto dataDto, int id)
         {
-            var updatedUser = await authService.UpdateUserAsync(dataDto, id);
+            var updatedUser = await userService.UpdateUserAsync(dataDto, id);
             return Ok(updatedUser);
         }
 
@@ -45,7 +45,7 @@ namespace TimeRecord.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var deletedUser = await authService.DeleteUserAsync(id);
+            var deletedUser = await userService.DeleteUserAsync(id);
             return Ok(deletedUser);
         }
 

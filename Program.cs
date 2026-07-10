@@ -93,7 +93,7 @@ builder.Services
             {
                 context.Response.StatusCode = 401;
                 context.Response.ContentType = "application/json";
-                var result = new AuthResponseTokenDTO()
+                var result = new UsersResponseTokenDTO()
                 {
                     StatusCode = 401,
                     Message = "Missing or invalid access token.",
@@ -118,7 +118,7 @@ builder.Services
 builder.Services.AddAuthorization(); // required for [Authorize] [web:11]
 
 // ===== DI =====
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<TimeRecordsService>();
 builder.Services.AddScoped<CompanyService>();
