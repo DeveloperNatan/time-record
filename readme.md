@@ -1,109 +1,136 @@
-⌚ Ponto Fácil Backend
+# ⌚ Time Record Backend
 
-API REST para registro e gestão de ponto de funcionários, desenvolvida com ASP.NET Core e focada em uma abordagem moderna de execução em contêiner, automação de pipeline e publicação em cloud.
-Visão geral
+API REST para gestão de ponto de funcionários, desenvolvida em **C# com .NET 9 e ASP.NET Core**.
 
-O backend do Ponto Fácil foi construído em .NET 9 com ASP.NET Core Web API, utilizando C# e Entity Framework Core para expor endpoints de cadastro de funcionários, registro de marcações de ponto e consulta de histórico.
+O projeto implementa recursos para cadastro de funcionários, registro de marcações de ponto e consulta de histórico, utilizando **Entity Framework Core** e **PostgreSQL** para persistência dos dados. A aplicação também é containerizada com Docker e preparada para execução em ambientes Linux e pipelines de CI/CD.
 
-A aplicação utiliza um banco de dados PostgreSQL externo hospedado no Neon, o que desacopla a camada de persistência do contêiner da aplicação e aproxima o projeto de uma arquitetura mais próxima de ambiente real de produção.
-Tecnologias principais
+## Visão geral
 
-    .NET 9 / ASP.NET Core Web API
+O **Time Record Backend** foi desenvolvido como uma Web API em **ASP.NET Core**, com foco na construção de serviços HTTP, organização de endpoints, persistência de dados e integração com aplicações cliente.
 
-    C#
+A API expõe operações para gerenciar funcionários e suas marcações de ponto, permitindo que o frontend desenvolvido em **Angular** consuma os dados por meio de endpoints REST documentados com Swagger/OpenAPI.
 
-    Entity Framework Core
+A camada de dados utiliza Entity Framework Core para comunicação com PostgreSQL, mantendo a string de conexão configurável por variáveis de ambiente. Isso evita dependências fixas no código e facilita a execução local, em contêineres e em cloud.
 
-    PostgreSQL externo (Neon)
+## Tecnologias
 
-    Docker
+- **C#**
+- **.NET 9**
+- **ASP.NET Core Web API**
+- **Entity Framework Core**
+- **PostgreSQL**
+- **Swagger / OpenAPI**
+- **Angular**
+- **Docker**
+- **GitHub Actions**
+- **Azure App Service**
+- **Neon PostgreSQL**
 
-    GitHub Actions
+## Funcionalidades
 
-    Azure para hospedagem do contêiner
+- CRUD de funcionários
+- Registro de marcações de ponto
+- Consulta de histórico de marcações por funcionário
+- Persistência de dados com Entity Framework Core e PostgreSQL
+- Documentação e testes de endpoints com Swagger/OpenAPI
+- Integração com o frontend **Time Record**, desenvolvido em Angular
 
-Funcionalidades
+## Arquitetura e desenvolvimento
 
-    CRUD de funcionários
+A aplicação foi estruturada para separar responsabilidades entre a camada de API, regras de negócio e persistência de dados.
 
-    Registro de marcações de ponto
+O ASP.NET Core é responsável por receber requisições HTTP, validar dados e retornar respostas REST. O Entity Framework Core abstrai a comunicação com o banco PostgreSQL, permitindo trabalhar com entidades e consultas em C#.
 
-    Consulta de histórico de marcações por funcionário
+A configuração da aplicação é baseada em variáveis de ambiente, especialmente para dados sensíveis e configurações dependentes do ambiente, como a connection string do banco de dados.
 
-    Integração com o frontend Ponto Fácil em Next.js
+```text
+Frontend (Angular)
+        |
+        v
+ASP.NET Core Web API
+        |
+        v
+Entity Framework Core
+        |
+        v
+PostgreSQL (Neon)
+```
 
-    Exposição de documentação interativa da API via Swagger/OpenAPI.
+## Swagger
 
-Swagger e consumo da API
+A API disponibiliza documentação interativa com Swagger/OpenAPI para consulta de endpoints, contratos de entrada e saída e testes diretos via interface web.
 
-A API disponibiliza documentação interativa via Swagger, permitindo visualizar endpoints, contratos de entrada e saída e testar chamadas HTTP diretamente pela interface.
+Acesse a versão publicada:
 
-URL publicada:
+[Swagger - Time Record Backend](https://timerecord-dev-b5cwhmadgrguhvb6.brazilsouth-01.azurewebsites.net/swagger/index.html)
 
-    https://timerecord-dev-b5cwhmadgrguhvb6.brazilsouth-01.azurewebsites.net/swagger/index.html
+> Em produção, a exposição do Swagger deve ser avaliada conforme os requisitos de segurança do ambiente, podendo ser limitada por autenticação, rede ou configuração de ambiente.
 
-Como boa prática, Swagger em produção deve ser avaliado com cuidado e, em cenários mais rígidos, protegido ou limitado por ambiente, autenticação ou regra de acesso.
-Docker
+## Executando com Docker
 
-Um dos principais destaques técnicos do projeto é a execução do backend em contêiner Docker, o que padroniza o ambiente, reduz diferenças entre máquina local e cloud e facilita build, distribuição e deploy.
+O projeto utiliza Docker para padronizar o ambiente de execução da API.
 
-O uso de Docker neste projeto traz benefícios práticos:
+A containerização garante que a aplicação seja executada com as mesmas dependências em desenvolvimento, integração contínua e produção, reduzindo diferenças entre sistemas operacionais e facilitando o deploy.
 
-    empacotamento consistente da aplicação e suas dependências;
+Exemplo de execução:
 
-    facilidade para publicar versões da imagem;
+```bash
+docker build -t time-record-backend .
+docker run -p 8080:8080 \
+  -e ConnectionStrings__DefaultConnection="SUA_CONNECTION_STRING" \
+  time-record-backend
+```
 
-    integração direta com pipeline automatizado;
+Após iniciar o contêiner, a documentação pode ser acessada em:
 
-    caminho mais simples para deploy em serviços gerenciados do Azure.
+```text
+http://localhost:8080/swagger
+```
 
+## Banco de dados
+
+O backend utiliza PostgreSQL hospedado no Neon como serviço externo de persistência.
+
+A separação entre a API e o banco de dados permite que cada componente seja configurado, atualizado e escalado de forma independente. A connection string é fornecida por variável de ambiente, sem expor credenciais no repositório.
+
+Exemplo:
+
+```bash
+ConnectionStrings__DefaultConnection="Host=...;Database=...;Username=...;Password=..."
+```
+
+## CI/CD e deploy
+
+O GitHub Actions automatiza etapas do ciclo de entrega, como build da aplicação, criação da imagem Docker e publicação no registry.
+
+O deploy é realizado no Azure App Service com suporte a contêineres, permitindo publicar novas versões da API a partir de imagens geradas pelo pipeline.
+
+```text
+Push / Pull Request
+        |
+        v
 GitHub Actions
+        |
+        v
+Build .NET + Docker Image
+        |
+        v
+Container Registry
+        |
+        v
+Azure App Service
+```
 
-O projeto utiliza GitHub Actions para automação de etapas do ciclo de entrega. Workflows do GitHub Actions permitem reagir a eventos como pull_request e push, executando testes, build e publicação de artefatos automaticamente.
+## Objetivo do projeto
 
-No cenário atual do projeto, o pipeline foi estruturado para publicar a imagem Docker em repositório de imagens, usando actions reutilizáveis para checkout do código, autenticação no registry e build/push da imagem.
+Este projeto demonstra o desenvolvimento de uma API REST moderna com **C#, .NET e ASP.NET Core**, cobrindo:
 
-Esse fluxo normalmente envolve ações como:
-
-    actions/checkout para baixar o código no runner;
-
-    docker/login-action para autenticação segura no registry;
-
-    docker/build-push-action para buildar e publicar a imagem Docker.
-
-Essa automação reduz trabalho manual, melhora repetibilidade do processo e torna o projeto mais alinhado a práticas reais de CI/CD.
-Azure
-
-O deploy do backend é feito no Azure com uma abordagem baseada em contêiner, o que facilita a publicação de novas versões da aplicação e torna o processo compatível com pipelines automatizados.
-
-No Azure App Service para contêineres, é possível configurar CI/CD para imagens customizadas e integrar a aplicação com um fluxo de publicação vindo do GitHub Actions.
-
-Em cenários com atualização contínua de imagem, o Azure App Service pode ser configurado para detectar atualizações no registry e reiniciar a aplicação para fazer novo pull da imagem publicada.
-
-Esse modelo é interessante porque separa claramente responsabilidades:
-
-    o GitHub Actions gera e publica a imagem;
-
-    o registry armazena a versão da aplicação;
-
-    o Azure executa o contêiner em ambiente gerenciado.
-
-Banco de dados externo
-
-O projeto utiliza PostgreSQL externo no Neon, o que é uma decisão importante do ponto de vista arquitetural. Em vez de acoplar o banco ao mesmo contêiner da API, a aplicação consome um serviço de dados dedicado, o que é mais aderente a boas práticas de produção.
-
-Esse desenho reforça conceitos importantes para quem avalia o projeto:
-
-    separação entre aplicação e persistência;
-
-    maior flexibilidade de deploy;
-
-    possibilidade de escalar ou trocar a camada de banco de forma independente;
-
-    alinhamento com arquitetura cloud-native.
-
-A documentação interativa da API está disponível no Swagger publicado em produção, o que facilita testes, inspeção de contratos e validação rápida dos recursos disponíveis.
-
-Link de acesso:
-
-    https://timerecord-dev-b5cwhmadgrguhvb6.brazilsouth-01.azurewebsites.net/swagger/index.html
+- Criação de endpoints REST
+- Modelagem e persistência de dados relacionais
+- Uso de Entity Framework Core
+- Configuração por ambiente
+- Documentação de API com Swagger/OpenAPI
+- Integração com frontend Angular
+- Containerização com Docker
+- Automação de build e deploy com GitHub Actions
+- Publicação em ambiente cloud com Azure
