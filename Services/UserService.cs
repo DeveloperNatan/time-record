@@ -81,91 +81,145 @@ public class UserService(AppDbContext appDbContext)
     }
 
 
-   public async Task<UsersResponseTokenDTO> CreateUserAsync(CreateUserDto dataDto)
-{
-    var existingEmail = await appDbContext.Users
-        .AnyAsync(e => e.Email == dataDto.Email);
-
-    if (existingEmail)
-        throw new ValidationException("This Email can't be used");
-
-    await using var transaction = await appDbContext.Database.BeginTransactionAsync();
-
-    try
+    public async Task<UsersResponseTokenDTO> CreateUserEmployeeAsync(RegisterEmployeeDto dataEmployeeEmployeeDto)
     {
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(dataDto.Password);
+        var existingEmail = await appDbContext.Users
+            .AnyAsync(e => e.Email == dataEmployeeEmployeeDto.Email);
 
-        var createdUser = new Users
+        if (existingEmail)
+            throw new ValidationException("This Email can't be used");
+
+        await using var transaction = await appDbContext.Database.BeginTransactionAsync();
+
+        try
         {
-            Email = dataDto.Email,
-            PasswordHash = passwordHash,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-        };
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(dataEmployeeEmployeeDto.Password);
 
-        await appDbContext.Users.AddAsync(createdUser);
-        Console.Write(createdUser.Id);
-        await appDbContext.SaveChangesAsync();
-
-        if (dataDto.ProfileType == UserProfileType.Employee)
-        {
-            if (string.IsNullOrWhiteSpace(dataDto.Name))
-                throw new ValidationException("Name is required for employee");
-
-            if (string.IsNullOrWhiteSpace(dataDto.Job))
-                throw new ValidationException("Job is required for employee");
-
-            if (!dataDto.Matriculation.HasValue)
-                throw new ValidationException("Matriculation is required for employee");
-
-            var employee = new Employee()
+            var createdUser = new Users
             {
-                Name = dataDto.Name,
-                Job = dataDto.Job,
-                Matriculation = dataDto.Matriculation.Value,
-                UserId = createdUser.Id,
-                CompanyId = 2,
+                Email = dataEmployeeEmployeeDto.Email,
+                PasswordHash = passwordHash,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
             };
 
-            await appDbContext.Employees.AddAsync(employee);
+            await appDbContext.Users.AddAsync(createdUser);
+            Console.Write(createdUser.Id);
+            await appDbContext.SaveChangesAsync();
+
+            if (dataEmployeeEmployeeDto.ProfileType == UserProfileType.Employee)
+            {
+                if (string.IsNullOrWhiteSpace(dataEmployeeEmployeeDto.Name))
+                    throw new ValidationException("Name is required for employee");
+
+                if (string.IsNullOrWhiteSpace(dataEmployeeEmployeeDto.Job))
+                    throw new ValidationException("Job is required for employee");
+
+                if (!dataEmployeeEmployeeDto.Matriculation.HasValue)
+                    throw new ValidationException("Matriculation is required for employee");
+
+                var employee = new Employee()
+                {
+                    Name = dataEmployeeEmployeeDto.Name,
+                    Job = dataEmployeeEmployeeDto.Job,
+                    Matriculation = dataEmployeeEmployeeDto.Matriculation.Value,
+                    UserId = createdUser.Id,
+                    CompanyId = 2,
+                };
+
+                await appDbContext.Employees.AddAsync(employee);
+            }
+            else if (dataEmployeeEmployeeDto.ProfileType == UserProfileType.Companies)
+            {
+                if (string.IsNullOrWhiteSpace(dataEmployeeEmployeeDto.CompanyName))
+                    throw new ValidationException("CompanyName is required for companyv");
+
+                var company = new Companies
+                {
+                    Name = dataEmployeeEmployeeDto.CompanyName,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    UserId = createdUser.Id
+                };
+
+                await appDbContext.Companies.AddAsync(company);
+            }
+            else
+            {
+                throw new ValidationException("Invalid profile type");
+            }
+
+            await appDbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return new UsersResponseTokenDTO()
+            {
+                StatusCode = 201,
+                Message = "User created successfully",
+                Authentication = true,
+            };
         }
-        else if (dataDto.ProfileType == UserProfileType.Company)
+        catch
         {
-            if (string.IsNullOrWhiteSpace(dataDto.CompanyName))
-                throw new ValidationException("CompanyName is required for company");
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task<UsersResponseTokenDTO> CreatUserCompaniesAsync(RegisterComapiesDto dataEmployeeDto)
+    {
+        var existingEmail = await appDbContext.Users
+            .AnyAsync(e => e.Email == dataEmployeeDto.Email);
+
+        if (existingEmail)
+            throw new ValidationException("This Email can't be used");
+
+        await using var transaction = await appDbContext.Database.BeginTransactionAsync();
+
+        try
+        {
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(dataEmployeeDto.Password);
+
+            var createdUser = new Users
+            {
+                Email = dataEmployeeDto.Email,
+                PasswordHash = passwordHash,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+            };
+
+            await appDbContext.Users.AddAsync(createdUser);
+            Console.Write(createdUser.Id);
+            await appDbContext.SaveChangesAsync();
+
 
             var company = new Companies
             {
-                Name = dataDto.CompanyName,
+                Name = dataEmployeeDto.CompanyName,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 UserId = createdUser.Id
             };
 
-            await appDbContext.Companies.AddAsync(company);
-        }
-        else
-        {
-            throw new ValidationException("Invalid profile type");
-        }
 
-        await appDbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
+            await appDbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
 
-        return new UsersResponseTokenDTO()
+            return new UsersResponseTokenDTO()
+            {
+                StatusCode = 201,
+                Message = "User created successfully",
+                Authentication = true,
+            };
+        }
+        catch
         {
-            StatusCode = 201,
-            Message = "User created successfully",
-            Authentication = true,
-        };
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
-    catch
-    {
-        await transaction.RollbackAsync();
-        throw;
-    }
-}
 
     public async Task<IEnumerable<Users>> GetUserAsync()
     {

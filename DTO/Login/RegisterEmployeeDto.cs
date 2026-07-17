@@ -3,10 +3,10 @@ namespace TimeRecord.DTO.Login;
 public enum UserProfileType
 {
     Employee = 1,
-    Company = 2
+    Companies = 2
 }
 
-public class CreateUserDto
+public class RegisterEmployeeDto
 {
     public string Email { get; set; } = default!;
     public string Password { get; set; } = default!;
@@ -21,3 +21,4 @@ public class CreateUserDto
     // Company
     public string? CompanyName { get; set; }
 }
+

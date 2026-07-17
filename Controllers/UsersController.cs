@@ -17,13 +17,20 @@ namespace TimeRecord.Controllers
             return Ok(validatedUser);
         }
         
-        [HttpPost("register")]
-        public async Task<IActionResult> CreateAsync(CreateUserDto requestLoginDto)
+        [HttpPost("register/employee")]
+        public async Task<IActionResult> CreateEmployeeAsync(RegisterEmployeeDto requestLoginEmployeeEmployeeDto)
         {
-            var userCreated = await userService.CreateUserAsync(requestLoginDto);
-            return Ok(userCreated);
+            var userEmployeeCreated = await userService.CreateUserEmployeeAsync(requestLoginEmployeeEmployeeDto);
+            return Ok(userEmployeeCreated);
         }
 
+        [HttpPost("register/companies")]
+        public async Task<IActionResult> CreateCompaniesAsync(RegisterComapiesDto requestLoginEmployeeCompaniesDto)
+        {
+            var userCompaniesCreated = await userService.CreatUserCompaniesAsync(requestLoginEmployeeCompaniesDto);
+            return Ok(userCompaniesCreated);
+        }
+        
 
         [HttpGet("users")]
         [Authorize]
