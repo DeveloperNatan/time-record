@@ -15,7 +15,7 @@ A camada de dados utiliza Entity Framework Core para comunicação com PostgreSQ
 ## Tecnologias
 
 - **C#**
-- **.NET 9**
+- **.NET 9.0**
 - **ASP.NET Core Web API**
 - **Entity Framework Core**
 - **PostgreSQL**
