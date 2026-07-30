@@ -2,15 +2,20 @@ using Microsoft.AspNetCore.Mvc;
 using TimeRecord.DTO.Company;
 using TimeRecord.Services;
 using Microsoft.AspNetCore.Authorization;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace TimeRecord.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CompanyController(CompanyService companyService) : ControllerBase
+    public class CompaniesController(CompanyService companyService) : ControllerBase
     {
         [HttpGet]
         [Authorize]
+        [SwaggerOperation(
+            Summary = "Lists the companies in the system.",
+            Description = "Returns all companies in the system."
+        )]
         public async Task<IActionResult> GetAllAsync()
         {
             var companies = await companyService.GetUserAsync();

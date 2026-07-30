@@ -10,10 +10,10 @@ using TimeRecord.Data;
 using TimeRecord.DTO.Auth;
 using TimeRecord.Middleware;
 using TimeRecord.Services;
+using Swashbuckle.AspNetCore.Annotations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===== Load JWT secret from config (appsettings / env var) =====
 JwtConfiguration.PrivateKey =
     builder.Configuration["Jwt:PrivateKey"]
     ?? throw new Exception("Missing config: Jwt:PrivateKey"); 
@@ -32,10 +32,9 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 
 // ===== Swagger (must be BEFORE builder.Build) =====
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
 {
-    // Enables the "Authorize" button + sends Authorization: Bearer <token> [web:163]
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
@@ -44,8 +43,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Cole só o token (eyJ...)."
     });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -59,6 +57,8 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+
+    options.EnableAnnotations();
 });
 
 // ===== CORS =====
@@ -71,14 +71,14 @@ builder.Services.AddCors(options =>
     );
 });
 
-// ===== Database =====
+// ===== Connection =====
 var connectionString =
     Environment.GetEnvironmentVariable("POSTGRESQLCONNSTR_AppDbConnectionString")
     ?? builder.Configuration.GetConnectionString("POSTGRESQLCONNSTR_AppDbConnectionString");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
-// ===== JWT Auth =====
+// ===== JWT =====
 builder.Services
     .AddAuthentication(options =>
     {
@@ -125,13 +125,11 @@ builder.Services.AddScoped<CompanyService>();
 
 var app = builder.Build();
 
-// ===== Swagger middleware (commonly only in Development) =====
-
+// ===== Swagger middleware =====
 app.UseSwagger();
 app.UseSwaggerUI();
 
-
-// ===== Middleware pipeline =====
+// ===== Middleware exception =====
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseCors("MyPolicyCors");

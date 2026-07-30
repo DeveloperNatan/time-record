@@ -190,7 +190,6 @@ public class UserService(AppDbContext appDbContext)
             };
 
             await appDbContext.Users.AddAsync(createdUser);
-            Console.Write(createdUser.Id);
             await appDbContext.SaveChangesAsync();
 
 
@@ -204,6 +203,7 @@ public class UserService(AppDbContext appDbContext)
             };
 
 
+            await appDbContext.Companies.AddAsync(company);
             await appDbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
