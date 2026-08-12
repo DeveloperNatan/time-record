@@ -29,8 +29,11 @@ namespace TimeRecord.Models
         public Users Users { get; set; }
 
         public int? CompanyId { get; set; }
-
+        
+        public string CompanyName { get; set; }
+        
         [ForeignKey((nameof(CompanyId)))]
+        
         [JsonIgnore]
         public Companies Companies { get; set; }
     }
