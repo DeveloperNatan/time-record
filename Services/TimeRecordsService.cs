@@ -20,11 +20,10 @@ namespace TimeRecord.Services
                 throw new NotFoundException(404, "Matriculation not found in the system!");
             }
 
-            //save data
+   
             var timeRecords = new TimeRecords()
             {
                 EmployeeId = employee.Id,
-                // CompanyId = employee.CompanyId,
                 RecordedAt = DateTime.UtcNow,
             };
 

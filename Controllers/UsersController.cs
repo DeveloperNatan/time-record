@@ -8,7 +8,7 @@ namespace TimeRecord.Controllers
 {
     [ApiController]
     [Route("api/auth/")]
-    public class UsersController(UserService userService, AppDbContext appDbContext) : ControllerBase
+    public class UsersController(UserService userService) : ControllerBase
     {
         [HttpPost("login")]
         public async Task<IActionResult> ValidateUserAsync(LoginDto requestLoginDto)

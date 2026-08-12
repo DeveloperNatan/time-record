@@ -30,7 +30,7 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
     };
 });
 
-// ===== Swagger (must be BEFORE builder.Build) =====
+// ===== Swagger =====
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -121,7 +121,7 @@ builder.Services.AddAuthorization(); // required for [Authorize] [web:11]
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<TimeRecordsService>();
-builder.Services.AddScoped<CompanyService>();
+builder.Services.AddScoped<CompaniesService>();
 
 var app = builder.Build();
 

@@ -10,7 +10,7 @@ public class RegisterEmployeeDto
 {
     public string Email { get; set; } = default!;
     public string Password { get; set; } = default!;
-    public UserProfileType ProfileType { get; set; }
+  
 
     // Employee
     public string? Name { get; set; }
@@ -18,7 +18,6 @@ public class RegisterEmployeeDto
     public int? Matriculation { get; set; }
     public int? CompanyId { get; set; }
 
-    // Company
-    public string? CompanyName { get; set; }
+ 
 }
 
