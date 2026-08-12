@@ -8,7 +8,7 @@ using TimeRecord.Validation;
 
 namespace TimeRecord.Services
 {
-    public class CompanyService(AppDbContext appDbContext)
+    public class CompaniesService(AppDbContext appDbContext)
     {
         public async Task<IEnumerable<CompanyResponseDto>> GetUserAsync()
         {

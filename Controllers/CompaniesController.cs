@@ -8,7 +8,7 @@ namespace TimeRecord.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CompaniesController(CompanyService companyService) : ControllerBase
+    public class CompaniesController(CompaniesService companiesService) : ControllerBase
     {
         [HttpGet]
         [Authorize]
@@ -18,23 +18,29 @@ namespace TimeRecord.Controllers
         )]
         public async Task<IActionResult> GetAllAsync()
         {
-            var companies = await companyService.GetUserAsync();
+            var companies = await companiesService.GetUserAsync();
             return Ok(companies);
         }
 
         [HttpGet("{id}")]
         [Authorize]
+        [SwaggerOperation(
+            Summary = "List one company in the system.",
+            Description = "Returns one company in the system.")]
         public async Task<IActionResult> GetAsync(int id)
         {
-            var company = await companyService.GetUserAsync(id);
+            var company = await companiesService.GetUserAsync(id);
             return Ok(company);
         }
 
         [HttpPost]
         [Authorize]
+        [SwaggerOperation(
+            Summary = "Create profile company, not user ",
+            Description = "return one profile")]
         public async Task<IActionResult> CreateAsync(CompanyCreateDto createRequestDto)
         {
-            var companyCreated = await companyService.CreateCompanyAsync(createRequestDto);
+            var companyCreated = await companiesService.CreateCompanyAsync(createRequestDto);
             return Ok(companyCreated);
         }
 
@@ -42,7 +48,7 @@ namespace TimeRecord.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateAsync(CompanyCreateDto createRequestDto, int id)
         {
-            var updatedCompany = await companyService.UpdateCompanyAsync(createRequestDto, id);
+            var updatedCompany = await companiesService.UpdateCompanyAsync(createRequestDto, id);
             return Ok(updatedCompany);
         }
 
@@ -50,7 +56,7 @@ namespace TimeRecord.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var deletedCompany = await companyService.DeleteCompanyAsync(id);
+            var deletedCompany = await companiesService.DeleteCompanyAsync(id);
             return Ok(deletedCompany);
         }
     }
