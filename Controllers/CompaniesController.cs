@@ -47,7 +47,7 @@ namespace TimeRecord.Controllers
         [HttpPut("{id}")]
         [Authorize]
         [SwaggerOperation(
-            Summary = "Update profile company, not user ", 
+            Summary = "Update profile company, not user ",
             Description = "return profile altered")]
         public async Task<IActionResult> UpdateAsync(CompanyCreateDto createRequestDto, int id)
         {
@@ -57,7 +57,9 @@ namespace TimeRecord.Controllers
 
         [HttpDelete("{id}")]
         [Authorize]
-        
+        [SwaggerOperation(
+            Summary = "Delete profile company, not user ",
+            Description = "return profile deleted")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             var deletedCompany = await companiesService.DeleteCompanyAsync(id);
