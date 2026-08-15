@@ -26,7 +26,7 @@ namespace TimeRecord.Controllers
         [Authorize]
         [SwaggerOperation(
             Summary = "List one company in the system.",
-            Description = "Returns one company in the system.")]
+            Description = "Returns one company.")]
         public async Task<IActionResult> GetAsync(int id)
         {
             var company = await companiesService.GetUserAsync(id);
