@@ -1,4 +1,4 @@
-namespace TimeRecord.DTO.Auth;
+namespace TimeRecord.DTO.Users;
 
 public class UsersMessageDto
 {
