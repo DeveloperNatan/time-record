@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using TimeRecord.Data;
+using TimeRecord.DTO.Users;
 using TimeRecord.DTO.Auth;
 using TimeRecord.DTO.Login;
 using TimeRecord.Services;
