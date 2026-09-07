@@ -8,10 +8,10 @@ public enum UserProfileType
 
 public class RegisterEmployeeDto
 {
-    public string Email { get; set; } = null!;
-    public string Password { get; set; } = null!;
+    public string Email { get; set; } = default!;
+    public string Password { get; set; } = default!;
 
-    public string[] Roles { get; set; } = null!;
+    public string[] Roles { get; set; } = default!;
   
 
     // Employee
