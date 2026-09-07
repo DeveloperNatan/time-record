@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TimeRecord.Data;
-using TimeRecord.DTO.Auth;
+using TimeRecord.DTO.Users;
 using TimeRecord.DTO.Login;
 using TimeRecord.DTO.Users;
 using TimeRecord.Exceptions;
@@ -82,7 +82,7 @@ public class UserService(AppDbContext appDbContext)
     }
 
 
-    public async Task<UsersResponseTokenDTO> CreateUserEmployeeAsync(RegisterEmployeeDto dataEmployeeEmployeeDto)
+    public async Task<UsersResponseTokenDto> CreateUserEmployeeAsync(RegisterEmployeeDto dataEmployeeEmployeeDto)
     {
         var existingEmail = await appDbContext.Users
             .AnyAsync(e => e.Email == dataEmployeeEmployeeDto.Email);
@@ -149,7 +149,7 @@ public class UserService(AppDbContext appDbContext)
             await appDbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return new UsersResponseTokenDTO()
+            return new UsersResponseTokenDto()
             {
                 StatusCode = 201,
                 Message = "User created successfully",
@@ -163,7 +163,7 @@ public class UserService(AppDbContext appDbContext)
         }
     }
 
-    public async Task<UsersResponseTokenDTO> CreatUserCompaniesAsync(RegisterComapiesDto dataEmployeeDto)
+    public async Task<UsersResponseTokenDto> CreatUserCompaniesAsync(RegisterComapiesDto dataEmployeeDto)
     {
         var existingEmail = await appDbContext.Users
             .AnyAsync(e => e.Email == dataEmployeeDto.Email);
@@ -204,7 +204,7 @@ public class UserService(AppDbContext appDbContext)
             await appDbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return new UsersResponseTokenDTO()
+            return new UsersResponseTokenDto()
             {
                 StatusCode = 201,
                 Message = "User created successfully",
@@ -225,7 +225,7 @@ public class UserService(AppDbContext appDbContext)
     }
 
 
-    public async Task<UsersResponseDTO> UpdateUserAsync(LoginDto dataDto, int id)
+    public async Task<UsersResponseDto> UpdateUserAsync(LoginDto dataDto, int id)
     {
         var updatedUser = await appDbContext.Users.FindAsync(id);
         if (updatedUser == null)
@@ -246,7 +246,7 @@ public class UserService(AppDbContext appDbContext)
 
         await appDbContext.SaveChangesAsync();
 
-        var response = new UsersResponseDTO()
+        var response = new UsersResponseDto()
         {
             Email = updatedUser.Email,
             UpdatedAt = updatedUser.UpdatedAt,

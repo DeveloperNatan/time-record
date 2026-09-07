@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using TimeRecord.DTO.Users;
-using TimeRecord.DTO.Auth;
 using TimeRecord.DTO.Login;
 using TimeRecord.Services;
 using System.Security.Claims;
@@ -61,7 +60,7 @@ namespace TimeRecord.Controllers
         [SwaggerOperation(
             Summary = "Registers an employee user.",
             Description = "Creates the access user and its employee profile. The email must be unique and the informed company user must have the admin role.")]
-        [ProducesResponseType(typeof(UsersResponseTokenDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UsersResponseTokenDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateEmployeeAsync(
             [SwaggerRequestBody("User data (email, password, roles) and employee data (name, job, matriculation, company id).")]
@@ -75,7 +74,7 @@ namespace TimeRecord.Controllers
         [SwaggerOperation(
             Summary = "Registers a company user.",
             Description = "Creates the access user and its company profile. The email must be unique.")]
-        [ProducesResponseType(typeof(UsersResponseTokenDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UsersResponseTokenDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateCompaniesAsync(
             [SwaggerRequestBody("User data (email, password, roles) and the company name.")]
@@ -104,7 +103,7 @@ namespace TimeRecord.Controllers
         [SwaggerOperation(
             Summary = "Updates a user.",
             Description = "Updates the email and password of the user. Requires a JWT token.")]
-        [ProducesResponseType(typeof(UsersResponseDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UsersResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status404NotFound)]

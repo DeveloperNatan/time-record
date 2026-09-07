@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TimeRecord;
 using TimeRecord.Data;
-using TimeRecord.DTO.Auth;
+using TimeRecord.DTO.Users;
 using TimeRecord.Middleware;
 using TimeRecord.Services;
 
@@ -120,7 +120,7 @@ builder.Services
                 context.Response.StatusCode = 401;
                 context.Response.ContentType = "application/json";
 
-                var result = new UsersResponseTokenDTO()
+                var result = new UsersResponseTokenDto()
                 {
                     StatusCode = 401,
                     Message = "Missing or invalid access token.",
