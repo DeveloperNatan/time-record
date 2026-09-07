@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,13 +9,12 @@ using TimeRecord.Data;
 using TimeRecord.DTO.Auth;
 using TimeRecord.Middleware;
 using TimeRecord.Services;
-using Swashbuckle.AspNetCore.Annotations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 JwtConfiguration.PrivateKey =
     builder.Configuration["Jwt:PrivateKey"]
-    ?? throw new Exception("Missing config: Jwt:PrivateKey"); 
+    ?? throw new Exception("Missing config: Jwt:PrivateKey");
 
 // ===== Controllers + custom model validation response =====
 builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
@@ -77,10 +75,13 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicyCors", policy =>
-        policy.AllowAnyOrigin()
+    {
+        policy
+            .WithOrigins("http://localhost:4200")
             .AllowAnyHeader()
             .AllowAnyMethod()
-    );
+            .AllowCredentials();
+    });
 });
 
 // ===== Connection =====
@@ -101,19 +102,35 @@ builder.Services
     {
         options.Events = new JwtBearerEvents
         {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Cookies["access-token"];
+
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    context.Token = token;
+                }
+
+                return Task.CompletedTask;
+            },
+
             OnChallenge = context =>
             {
+                context.HandleResponse();
                 context.Response.StatusCode = 401;
                 context.Response.ContentType = "application/json";
+
                 var result = new UsersResponseTokenDTO()
                 {
                     StatusCode = 401,
                     Message = "Missing or invalid access token.",
                     Authentication = false,
                 };
+
                 return context.Response.WriteAsJsonAsync(result);
             }
         };
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             IssuerSigningKey = new SymmetricSecurityKey(

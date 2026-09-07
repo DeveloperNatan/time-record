@@ -5,6 +5,7 @@ using TimeRecord.Data;
 using TimeRecord.DTO.Auth;
 using TimeRecord.DTO.Login;
 using TimeRecord.Services;
+using System.Security.Claims;
 
 namespace TimeRecord.Controllers
 {
@@ -13,6 +14,18 @@ namespace TimeRecord.Controllers
     [SwaggerTag("Authentication and management of access users.")]
     public class UsersController(UserService userService) : ControllerBase
     {
+        
+        [HttpGet("me")]
+        [Authorize]
+        public IActionResult Me()
+        {
+            return Ok(new
+            {
+                authenticated = true,
+                email = User.FindFirst(ClaimTypes.Email)?.Value,
+                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            });
+        }
         [HttpPost("login")]
         [SwaggerOperation(
             Summary = "Authenticates a user.",
@@ -20,11 +33,28 @@ namespace TimeRecord.Controllers
         [ProducesResponseType(typeof(TimeRecord.Models.Token), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> ValidateUserAsync(
+        public async Task<UsersMessageDto> ValidateUserAsync(
             [SwaggerRequestBody("Login credentials (email and password).")] LoginDto requestLoginDto)
         {
             var validatedUser = await userService.LoginUserToken(requestLoginDto.Email, requestLoginDto.Password);
-            return Ok(validatedUser);
+            
+            Response.Cookies.Append("access-token", validatedUser.AcecessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddSeconds(validatedUser.ExpiresIn),
+                Path = "/"
+            });
+
+            var response = new UsersMessageDto()
+            {
+                StatusCode = 200,
+                Message = "Login successful."
+            };
+
+            return response;
+
         }
         
         [HttpPost("register/employee")]
