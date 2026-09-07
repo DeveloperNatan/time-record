@@ -59,6 +59,18 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     options.EnableAnnotations();
+
+    // TimeRecord.Models.ProblemDetails and Microsoft.AspNetCore.Mvc.ProblemDetails
+    // would both map to the schemaId "ProblemDetails", so the app one gets its own id.
+    options.CustomSchemaIds(type =>
+    {
+        if (type == typeof(TimeRecord.Models.ProblemDetails))
+            return "AppProblemDetails";
+
+        return type.IsGenericType
+            ? type.Name.Split('`')[0] + string.Concat(type.GetGenericArguments().Select(a => a.Name))
+            : type.Name;
+    });
 });
 
 // ===== CORS =====
