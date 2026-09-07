@@ -24,7 +24,7 @@ public class UserService(AppDbContext appDbContext)
 
         bool VerifyPassword(string passwordEntered)
         {
-            return BCrypt.Net.BCrypt.Verify(passwordEntered, userDb.PasswordHash);
+            return BCrypt.Net.BCrypt.Verify(passwordEntered, userDb.Password);
         }
 
         if (!VerifyPassword(password))
@@ -32,12 +32,12 @@ public class UserService(AppDbContext appDbContext)
             throw new UnauthorizedAccessException("Password incorrect!");
         }
 
-        var user = new Users
+        var user = new UserDto()
         {
             Id = userDb.Id,
             Email = userDb.Email,
-            PasswordHash = userDb.PasswordHash,
-            Roles = new[] { "admin" }
+            Password = userDb.Password,
+            Roles = userDb.Roles
         };
 
         var (token, expiresUtc) = GetToken(user);
@@ -50,7 +50,7 @@ public class UserService(AppDbContext appDbContext)
         };
     }
 
-    private (string Token, DateTime ExpiresUtc) GetToken(Users users)
+    private (string Token, DateTime ExpiresUtc) GetToken(UserDto users)
     {
         var handler = new JwtSecurityTokenHandler();
 
@@ -71,7 +71,7 @@ public class UserService(AppDbContext appDbContext)
         return (handler.WriteToken(token), expires);
     }
 
-    private ClaimsIdentity GenerateClaims(Users users)
+    private ClaimsIdentity GenerateClaims(UserDto users)
     {
         var ci = new ClaimsIdentity("token");
         ci.AddClaim(new Claim(ClaimTypes.NameIdentifier, users.Id.ToString()));
@@ -112,8 +112,8 @@ public class UserService(AppDbContext appDbContext)
             var createdUser = new Users
             {
                 Email = dataEmployeeEmployeeDto.Email,
-                PasswordHash = passwordHash,
-                Roles = new [] {"user"},
+                Password = passwordHash,
+                Roles = dataEmployeeEmployeeDto.Roles,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -179,8 +179,8 @@ public class UserService(AppDbContext appDbContext)
             var createdUser = new Users
             {
                 Email = dataEmployeeDto.Email,
-                PasswordHash = passwordHash,
-                Roles = new[] { "admin" },
+                Password = passwordHash,
+                Roles = dataEmployeeDto.Roles,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -239,7 +239,7 @@ public class UserService(AppDbContext appDbContext)
 
 
         updatedUser.Email = dataDto.Email;
-        updatedUser.PasswordHash = dataDto.PasswordHash;
+        updatedUser.Password = dataDto.Password;
         updatedUser.UpdatedAt = DateTime.UtcNow;
 
 
