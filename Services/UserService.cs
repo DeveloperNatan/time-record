@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using TimeRecord.Data;
 using TimeRecord.DTO.Users;
 using TimeRecord.DTO.Login;
-using TimeRecord.DTO.Users;
 using TimeRecord.Exceptions;
 using TimeRecord.Models;
 
