@@ -31,4 +31,4 @@ jobs:
           push: true
           tags: |
             natanrocco/time-record:latest
-            natanrocco/time-record:${{ github.sha }}
+            natanrocco/time-record:latest
