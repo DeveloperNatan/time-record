@@ -18,7 +18,7 @@ namespace TimeRecord.Models
         [Required]
         [MinLength(2)]
         [MaxLength(100)]
-        public string PasswordHash { get; set; }
+        public string Password { get; set; }
 
         [MinLength(3)] [MaxLength(30)] public string[] Roles { get; set; }
 

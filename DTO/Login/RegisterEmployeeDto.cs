@@ -10,6 +10,8 @@ public class RegisterEmployeeDto
 {
     public string Email { get; set; } = default!;
     public string Password { get; set; } = default!;
+
+    public string[] Roles { get; set; } = default!;
   
 
     // Employee

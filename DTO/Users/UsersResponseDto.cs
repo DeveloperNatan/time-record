@@ -1,6 +1,6 @@
-namespace TimeRecord.DTO.Auth;
+namespace TimeRecord.DTO.Users;
 
-public class UsersResponseDTO
+public class UsersResponseDto
 {
     public string Email {get;set;}
     public DateTime UpdatedAt {get;set;}

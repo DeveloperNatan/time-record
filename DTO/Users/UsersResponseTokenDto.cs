@@ -1,6 +1,6 @@
-﻿namespace TimeRecord.DTO.Auth
+﻿namespace TimeRecord.DTO.Users
 {
-    public class UsersResponseTokenDTO
+    public class UsersResponseTokenDto
     {
         public int StatusCode { get; set; }
        

@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,16 +6,15 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TimeRecord;
 using TimeRecord.Data;
-using TimeRecord.DTO.Auth;
+using TimeRecord.DTO.Users;
 using TimeRecord.Middleware;
 using TimeRecord.Services;
-using Swashbuckle.AspNetCore.Annotations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 JwtConfiguration.PrivateKey =
     builder.Configuration["Jwt:PrivateKey"]
-    ?? throw new Exception("Missing config: Jwt:PrivateKey"); 
+    ?? throw new Exception("Missing config: Jwt:PrivateKey");
 
 // ===== Controllers + custom model validation response =====
 builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
@@ -59,16 +57,31 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     options.EnableAnnotations();
+
+    // TimeRecord.Models.ProblemDetails and Microsoft.AspNetCore.Mvc.ProblemDetails
+    // would both map to the schemaId "ProblemDetails", so the app one gets its own id.
+    options.CustomSchemaIds(type =>
+    {
+        if (type == typeof(TimeRecord.Models.ProblemDetails))
+            return "AppProblemDetails";
+
+        return type.IsGenericType
+            ? type.Name.Split('`')[0] + string.Concat(type.GetGenericArguments().Select(a => a.Name))
+            : type.Name;
+    });
 });
 
 // ===== CORS =====
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicyCors", policy =>
-        policy.AllowAnyOrigin()
+    {
+        policy
+            .WithOrigins("http://localhost:4200")
             .AllowAnyHeader()
             .AllowAnyMethod()
-    );
+            .AllowCredentials();
+    });
 });
 
 // ===== Connection =====
@@ -89,19 +102,35 @@ builder.Services
     {
         options.Events = new JwtBearerEvents
         {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Cookies["access-token"];
+
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    context.Token = token;
+                }
+
+                return Task.CompletedTask;
+            },
+
             OnChallenge = context =>
             {
+                context.HandleResponse();
                 context.Response.StatusCode = 401;
                 context.Response.ContentType = "application/json";
-                var result = new UsersResponseTokenDTO()
+
+                var result = new UsersResponseTokenDto()
                 {
                     StatusCode = 401,
                     Message = "Missing or invalid access token.",
                     Authentication = false,
                 };
+
                 return context.Response.WriteAsJsonAsync(result);
             }
         };
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             IssuerSigningKey = new SymmetricSecurityKey(

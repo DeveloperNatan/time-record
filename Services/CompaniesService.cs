@@ -129,6 +129,7 @@ namespace TimeRecord.Services
                 StatusCode = 201,
                 Message = "Successfully deleted company"
             };
+            
             return response;
         }
     }

@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TimeRecord.Data;
-using TimeRecord.DTO.Auth;
+using TimeRecord.DTO.Users;
 using TimeRecord.DTO.Login;
 using TimeRecord.Exceptions;
 using TimeRecord.Models;
@@ -24,7 +24,7 @@ public class UserService(AppDbContext appDbContext)
 
         bool VerifyPassword(string passwordEntered)
         {
-            return BCrypt.Net.BCrypt.Verify(passwordEntered, userDb.PasswordHash);
+            return BCrypt.Net.BCrypt.Verify(passwordEntered, userDb.Password);
         }
 
         if (!VerifyPassword(password))
@@ -32,12 +32,12 @@ public class UserService(AppDbContext appDbContext)
             throw new UnauthorizedAccessException("Password incorrect!");
         }
 
-        var user = new Users
+        var user = new UserDto()
         {
             Id = userDb.Id,
             Email = userDb.Email,
-            PasswordHash = userDb.PasswordHash,
-            Roles = new[] { "admin" }
+            Password = userDb.Password,
+            Roles = userDb.Roles
         };
 
         var (token, expiresUtc) = GetToken(user);
@@ -50,7 +50,7 @@ public class UserService(AppDbContext appDbContext)
         };
     }
 
-    private (string Token, DateTime ExpiresUtc) GetToken(Users users)
+    private (string Token, DateTime ExpiresUtc) GetToken(UserDto users)
     {
         var handler = new JwtSecurityTokenHandler();
 
@@ -71,7 +71,7 @@ public class UserService(AppDbContext appDbContext)
         return (handler.WriteToken(token), expires);
     }
 
-    private ClaimsIdentity GenerateClaims(Users users)
+    private ClaimsIdentity GenerateClaims(UserDto users)
     {
         var ci = new ClaimsIdentity("token");
         ci.AddClaim(new Claim(ClaimTypes.NameIdentifier, users.Id.ToString()));
@@ -81,7 +81,7 @@ public class UserService(AppDbContext appDbContext)
     }
 
 
-    public async Task<UsersResponseTokenDTO> CreateUserEmployeeAsync(RegisterEmployeeDto dataEmployeeEmployeeDto)
+    public async Task<UsersResponseTokenDto> CreateUserEmployeeAsync(RegisterEmployeeDto dataEmployeeEmployeeDto)
     {
         var existingEmail = await appDbContext.Users
             .AnyAsync(e => e.Email == dataEmployeeEmployeeDto.Email);
@@ -112,8 +112,8 @@ public class UserService(AppDbContext appDbContext)
             var createdUser = new Users
             {
                 Email = dataEmployeeEmployeeDto.Email,
-                PasswordHash = passwordHash,
-                Roles = new [] {"user"},
+                Password = passwordHash,
+                Roles = dataEmployeeEmployeeDto.Roles,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -148,7 +148,7 @@ public class UserService(AppDbContext appDbContext)
             await appDbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return new UsersResponseTokenDTO()
+            return new UsersResponseTokenDto()
             {
                 StatusCode = 201,
                 Message = "User created successfully",
@@ -162,7 +162,7 @@ public class UserService(AppDbContext appDbContext)
         }
     }
 
-    public async Task<UsersResponseTokenDTO> CreatUserCompaniesAsync(RegisterComapiesDto dataEmployeeDto)
+    public async Task<UsersResponseTokenDto> CreatUserCompaniesAsync(RegisterComapiesDto dataEmployeeDto)
     {
         var existingEmail = await appDbContext.Users
             .AnyAsync(e => e.Email == dataEmployeeDto.Email);
@@ -179,8 +179,8 @@ public class UserService(AppDbContext appDbContext)
             var createdUser = new Users
             {
                 Email = dataEmployeeDto.Email,
-                PasswordHash = passwordHash,
-                Roles = new[] { "admin" },
+                Password = passwordHash,
+                Roles = dataEmployeeDto.Roles,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -203,7 +203,7 @@ public class UserService(AppDbContext appDbContext)
             await appDbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return new UsersResponseTokenDTO()
+            return new UsersResponseTokenDto()
             {
                 StatusCode = 201,
                 Message = "User created successfully",
@@ -224,7 +224,7 @@ public class UserService(AppDbContext appDbContext)
     }
 
 
-    public async Task<UsersResponseDTO> UpdateUserAsync(LoginDto dataDto, int id)
+    public async Task<UsersResponseDto> UpdateUserAsync(LoginDto dataDto, int id)
     {
         var updatedUser = await appDbContext.Users.FindAsync(id);
         if (updatedUser == null)
@@ -239,13 +239,13 @@ public class UserService(AppDbContext appDbContext)
 
 
         updatedUser.Email = dataDto.Email;
-        updatedUser.PasswordHash = dataDto.PasswordHash;
+        updatedUser.Password = dataDto.Password;
         updatedUser.UpdatedAt = DateTime.UtcNow;
 
 
         await appDbContext.SaveChangesAsync();
 
-        var response = new UsersResponseDTO()
+        var response = new UsersResponseDto()
         {
             Email = updatedUser.Email,
             UpdatedAt = updatedUser.UpdatedAt,
