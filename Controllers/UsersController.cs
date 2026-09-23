@@ -57,6 +57,7 @@ namespace TimeRecord.Controllers
         }
         
         [HttpPost("register/employee")]
+        [Authorize]
         [SwaggerOperation(
             Summary = "Registers an employee user.",
             Description = "Creates the access user and its employee profile. The email must be unique and the informed company user must have the admin role.")]
@@ -71,6 +72,7 @@ namespace TimeRecord.Controllers
         }
 
         [HttpPost("register/companies")]
+        [Authorize]
         [SwaggerOperation(
             Summary = "Registers a company user.",
             Description = "Creates the access user and its company profile. The email must be unique.")]

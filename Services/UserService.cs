@@ -14,6 +14,7 @@ namespace TimeRecord.Services;
 
 public class UserService(AppDbContext appDbContext)
 {
+    //função de login ainda faz sentio porem deve ser revisado o local onde está aplicada.
     public async Task<Token> LoginUserToken(string email, string password)
     {
         var userDb = await appDbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
@@ -49,7 +50,9 @@ public class UserService(AppDbContext appDbContext)
             ExpiresIn = (int)(expiresUtc - DateTime.UtcNow).TotalSeconds,
         };
     }
-
+    
+    
+    //função gera "token" porém esamos utilizando http only. Nome da função deve alterado pois nãi faz mais tanto sentido.
     private (string Token, DateTime ExpiresUtc) GetToken(UserDto users)
     {
         var handler = new JwtSecurityTokenHandler();
@@ -71,6 +74,7 @@ public class UserService(AppDbContext appDbContext)
         return (handler.WriteToken(token), expires);
     }
 
+    //funcão fora do que user service atende.
     private ClaimsIdentity GenerateClaims(UserDto users)
     {
         var ci = new ClaimsIdentity("token");
