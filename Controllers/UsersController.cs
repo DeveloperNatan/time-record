@@ -13,7 +13,6 @@ namespace TimeRecord.Controllers
     [SwaggerTag("Authentication and management of access users.")]
     public class UsersController(UserService userService) : ControllerBase
     {
-        
         [HttpGet("me")]
         [Authorize]
         public IActionResult Me()
@@ -25,6 +24,7 @@ namespace TimeRecord.Controllers
                 userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
             });
         }
+
         [HttpPost("login")]
         [SwaggerOperation(
             Summary = "Authenticates a user.",
@@ -33,10 +33,11 @@ namespace TimeRecord.Controllers
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<UsersMessageDto> ValidateUserAsync(
-            [SwaggerRequestBody("Login credentials (email and password).")] LoginDto requestLoginDto)
+            [SwaggerRequestBody("Login credentials (email and password).")]
+            LoginDto requestLoginDto)
         {
             var validatedUser = await userService.LoginUserToken(requestLoginDto.Email, requestLoginDto.Password);
-            
+
             Response.Cookies.Append("access-token", validatedUser.AcecessToken, new CookieOptions
             {
                 HttpOnly = true,
@@ -53,18 +54,19 @@ namespace TimeRecord.Controllers
             };
 
             return response;
-
         }
-        
+
         [HttpPost("register/employee")]
         [Authorize]
         [SwaggerOperation(
             Summary = "Registers an employee user.",
-            Description = "Creates the access user and its employee profile. The email must be unique and the informed company user must have the admin role.")]
+            Description =
+                "Creates the access user and its employee profile. The email must be unique and the informed company user must have the admin role.")]
         [ProducesResponseType(typeof(UsersResponseTokenDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateEmployeeAsync(
-            [SwaggerRequestBody("User data (email, password, roles) and employee data (name, job, matriculation, company id).")]
+            [SwaggerRequestBody(
+                "User data (email, password, roles) and employee data (name, job, matriculation, company id).")]
             RegisterEmployeeDto requestLoginEmployeeEmployeeDto)
         {
             var userEmployeeCreated = await userService.CreateUserEmployeeAsync(requestLoginEmployeeEmployeeDto);
@@ -72,7 +74,6 @@ namespace TimeRecord.Controllers
         }
 
         [HttpPost("register/companies")]
-        [Authorize]
         [SwaggerOperation(
             Summary = "Registers a company user.",
             Description = "Creates the access user and its company profile. The email must be unique.")]
@@ -85,7 +86,7 @@ namespace TimeRecord.Controllers
             var userCompaniesCreated = await userService.CreatUserCompaniesAsync(requestLoginEmployeeCompaniesDto);
             return Ok(userCompaniesCreated);
         }
-        
+
 
         [HttpGet("users")]
         [Authorize]
@@ -110,7 +111,8 @@ namespace TimeRecord.Controllers
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(TimeRecord.Models.ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateAsync(
-            [SwaggerRequestBody("New user data (email and password).")] LoginDto dataDto,
+            [SwaggerRequestBody("New user data (email and password).")]
+            LoginDto dataDto,
             [SwaggerParameter("User id.")] int id)
         {
             var updatedUser = await userService.UpdateUserAsync(dataDto, id);
@@ -133,7 +135,6 @@ namespace TimeRecord.Controllers
         }
 
 
-       
         [HttpGet("test/token")]
         [Authorize]
         [SwaggerOperation(
