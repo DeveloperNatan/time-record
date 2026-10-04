@@ -1,4 +1,4 @@
-# ⌚ Time Record Backend
+# ⌚ Time Record — Sistema de gestão de ponto e jornadas para RH.
 
 API REST para gestão de ponto de funcionários, desenvolvida em **C# com .NET 9 e ASP.NET Core**.
 
