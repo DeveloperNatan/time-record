@@ -40,6 +40,8 @@ public class UserService(AppDbContext appDbContext)
             Password = userDb.Password,
             Roles = userDb.Roles
         };
+        
+     
 
         var (token, expiresUtc) = GetToken(user);
 
@@ -90,22 +92,21 @@ public class UserService(AppDbContext appDbContext)
         var existingEmail = await appDbContext.Users
             .AnyAsync(e => e.Email == dataEmployeeEmployeeDto.Email);
 
-        var existingUserCompany =
-            await appDbContext.Users.FirstOrDefaultAsync(e => e.Id == dataEmployeeEmployeeDto.CompanyId);
+       
         var existingCompany = await appDbContext.Companies.FirstOrDefaultAsync(e => e.Id == dataEmployeeEmployeeDto.CompanyId);
         
         if (existingEmail)
             throw new ValidationException("This Email can't be used");
 
-        if (existingUserCompany == null)
+        if (existingCompany == null)
         {
             throw new ValidationException("User not Found");
         }
 
-        if (!existingUserCompany.Roles.Contains("admin"))
-        {
-            throw new ValidationException("You don't have permission for create user");
-        }
+        // if (!existingUserCompany.Roles.Contains("admin"))
+        // {
+        //     throw new ValidationException("You don't have permission for create user");
+        // }
 
         await using var transaction = await appDbContext.Database.BeginTransactionAsync();
 
@@ -141,8 +142,7 @@ public class UserService(AppDbContext appDbContext)
                 Job = dataEmployeeEmployeeDto.Job,
                 Matriculation = dataEmployeeEmployeeDto.Matriculation.Value,
                 UserId = createdUser.Id,
-                
-                CompanyId = existingUserCompany.Id,
+                CompanyId = existingCompany.Id,
                 CompanyName = existingCompany.Name,
             };
 
@@ -227,7 +227,8 @@ public class UserService(AppDbContext appDbContext)
         return allUsers;
     }
 
-
+  
+    
     public async Task<UsersResponseDto> UpdateUserAsync(LoginDto dataDto, int id)
     {
         var updatedUser = await appDbContext.Users.FindAsync(id);

@@ -67,7 +67,6 @@ namespace TimeRecord.Services
 
         public async Task<EmployeeResponseDto> GetUserAsync(int matriculation)
         {
-            var employee = await appDbContext.Employees.FindAsync(matriculation);
             //puxar pela matricula
             var teste = await appDbContext.Employees.FirstOrDefaultAsync(e => e.Matriculation == matriculation);
             if (teste == null)
