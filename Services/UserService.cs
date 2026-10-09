@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TimeRecord.Data;
+using TimeRecord.DTO.Employee;
 using TimeRecord.DTO.Users;
 using TimeRecord.DTO.Login;
 using TimeRecord.Exceptions;
@@ -14,20 +15,19 @@ namespace TimeRecord.Services;
 
 public class UserService(AppDbContext appDbContext)
 {
-    //função de login ainda faz sentio porem deve ser revisado o local onde está aplicada.
     public async Task<Token> LoginUserToken(string email, string password)
     {
-        var userDb = await appDbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
-        if (userDb == null)
+        var userEmail = await appDbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
+        if (userEmail == null)
         {
             throw new NotFoundException(404, "User not found!");
         }
 
-        var employe = await appDbContext.Employees.FirstOrDefaultAsync(e => e.UserId == userDb.Id);
+        var employeeName = await appDbContext.Employees.FirstOrDefaultAsync(e => e.UserId == userEmail.Id);
 
         bool VerifyPassword(string passwordEntered)
         {
-            return BCrypt.Net.BCrypt.Verify(passwordEntered, userDb.Password);
+            return BCrypt.Net.BCrypt.Verify(passwordEntered, userEmail.Password);
         }
 
         if (!VerifyPassword(password))
@@ -37,14 +37,19 @@ public class UserService(AppDbContext appDbContext)
 
         var user = new UserDto()
         {
-            Id = userDb.Id,
-            Email = userDb.Email,
-            Password = userDb.Password,
-            Roles = userDb.Roles
+            Id = userEmail.Id,
+            Email = userEmail.Email,
+            Password = userEmail.Password,
+            Roles = userEmail.Roles
+        };
+
+        var employee = new EmployeeResponseDto()
+        {
+            Name = employeeName.Name,
         };
 
 
-        var (token, expiresUtc) = GetToken(user, employe);
+        var (token, expiresUtc) = GetToken(user, employee);
 
         return new Token()
         {
@@ -55,7 +60,7 @@ public class UserService(AppDbContext appDbContext)
     }
 
 
-    private (string Token, DateTime ExpiresUtc) GetToken(UserDto users, Employee employee)
+    private (string Token, DateTime ExpiresUtc) GetToken(UserDto users, EmployeeResponseDto employee)
     {
         var handler = new JwtSecurityTokenHandler();
 
@@ -76,8 +81,8 @@ public class UserService(AppDbContext appDbContext)
         return (handler.WriteToken(token), expires);
     }
 
-    //funcão fora do que user service atende.
-    private ClaimsIdentity GenerateClaims(UserDto users, Employee employee)
+
+    private ClaimsIdentity GenerateClaims(UserDto users, EmployeeResponseDto employee)
     {
         var ci = new ClaimsIdentity("token");
         ci.AddClaim(new Claim(ClaimTypes.NameIdentifier, users.Id.ToString()));
