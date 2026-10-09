@@ -23,6 +23,8 @@ public class UserService(AppDbContext appDbContext)
             throw new NotFoundException(404, "User not found!");
         }
 
+        var employe = await appDbContext.Employees.FirstOrDefaultAsync(e => e.UserId == userDb.Id);
+
         bool VerifyPassword(string passwordEntered)
         {
             return BCrypt.Net.BCrypt.Verify(passwordEntered, userDb.Password);
@@ -40,10 +42,9 @@ public class UserService(AppDbContext appDbContext)
             Password = userDb.Password,
             Roles = userDb.Roles
         };
-        
-     
 
-        var (token, expiresUtc) = GetToken(user);
+
+        var (token, expiresUtc) = GetToken(user, employe);
 
         return new Token()
         {
@@ -52,10 +53,9 @@ public class UserService(AppDbContext appDbContext)
             ExpiresIn = (int)(expiresUtc - DateTime.UtcNow).TotalSeconds,
         };
     }
-    
-    
-    //função gera "token" porém esamos utilizando http only. Nome da função deve alterado pois nãi faz mais tanto sentido.
-    private (string Token, DateTime ExpiresUtc) GetToken(UserDto users)
+
+
+    private (string Token, DateTime ExpiresUtc) GetToken(UserDto users, Employee employee)
     {
         var handler = new JwtSecurityTokenHandler();
 
@@ -69,7 +69,7 @@ public class UserService(AppDbContext appDbContext)
         {
             SigningCredentials = credentials,
             Expires = expires,
-            Subject = GenerateClaims(users)
+            Subject = GenerateClaims(users, employee)
         };
 
         var token = handler.CreateToken(tokenDescriptor);
@@ -77,12 +77,12 @@ public class UserService(AppDbContext appDbContext)
     }
 
     //funcão fora do que user service atende.
-    private ClaimsIdentity GenerateClaims(UserDto users)
+    private ClaimsIdentity GenerateClaims(UserDto users, Employee employee)
     {
         var ci = new ClaimsIdentity("token");
         ci.AddClaim(new Claim(ClaimTypes.NameIdentifier, users.Id.ToString()));
         ci.AddClaim(new Claim(ClaimTypes.Email, users.Email));
-
+        ci.AddClaim(new Claim(ClaimTypes.Name, employee.Name));
         return ci;
     }
 
@@ -92,9 +92,10 @@ public class UserService(AppDbContext appDbContext)
         var existingEmail = await appDbContext.Users
             .AnyAsync(e => e.Email == dataEmployeeEmployeeDto.Email);
 
-       
-        var existingCompany = await appDbContext.Companies.FirstOrDefaultAsync(e => e.Id == dataEmployeeEmployeeDto.CompanyId);
-        
+
+        var existingCompany =
+            await appDbContext.Companies.FirstOrDefaultAsync(e => e.Id == dataEmployeeEmployeeDto.CompanyId);
+
         if (existingEmail)
             throw new ValidationException("This Email can't be used");
 
@@ -227,8 +228,7 @@ public class UserService(AppDbContext appDbContext)
         return allUsers;
     }
 
-  
-    
+
     public async Task<UsersResponseDto> UpdateUserAsync(LoginDto dataDto, int id)
     {
         var updatedUser = await appDbContext.Users.FindAsync(id);
