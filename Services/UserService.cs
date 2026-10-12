@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TimeRecord.Data;
+using TimeRecord.DTO.Employee;
 using TimeRecord.DTO.Users;
 using TimeRecord.DTO.Login;
 using TimeRecord.Exceptions;
@@ -14,18 +15,19 @@ namespace TimeRecord.Services;
 
 public class UserService(AppDbContext appDbContext)
 {
-    //função de login ainda faz sentio porem deve ser revisado o local onde está aplicada.
     public async Task<Token> LoginUserToken(string email, string password)
     {
-        var userDb = await appDbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
-        if (userDb == null)
+        var userEmail = await appDbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
+        if (userEmail == null)
         {
             throw new NotFoundException(404, "User not found!");
         }
 
+        var employeeName = await appDbContext.Employees.FirstOrDefaultAsync(e => e.UserId == userEmail.Id);
+
         bool VerifyPassword(string passwordEntered)
         {
-            return BCrypt.Net.BCrypt.Verify(passwordEntered, userDb.Password);
+            return BCrypt.Net.BCrypt.Verify(passwordEntered, userEmail.Password);
         }
 
         if (!VerifyPassword(password))
@@ -35,13 +37,19 @@ public class UserService(AppDbContext appDbContext)
 
         var user = new UserDto()
         {
-            Id = userDb.Id,
-            Email = userDb.Email,
-            Password = userDb.Password,
-            Roles = userDb.Roles
+            Id = userEmail.Id,
+            Email = userEmail.Email,
+            Password = userEmail.Password,
+            Roles = userEmail.Roles
         };
 
-        var (token, expiresUtc) = GetToken(user);
+        var employee = new EmployeeResponseDto()
+        {
+            Name = employeeName.Name,
+        };
+
+
+        var (token, expiresUtc) = GetToken(user, employee);
 
         return new Token()
         {
@@ -50,10 +58,9 @@ public class UserService(AppDbContext appDbContext)
             ExpiresIn = (int)(expiresUtc - DateTime.UtcNow).TotalSeconds,
         };
     }
-    
-    
-    //função gera "token" porém esamos utilizando http only. Nome da função deve alterado pois nãi faz mais tanto sentido.
-    private (string Token, DateTime ExpiresUtc) GetToken(UserDto users)
+
+
+    private (string Token, DateTime ExpiresUtc) GetToken(UserDto users, EmployeeResponseDto employee)
     {
         var handler = new JwtSecurityTokenHandler();
 
@@ -67,20 +74,20 @@ public class UserService(AppDbContext appDbContext)
         {
             SigningCredentials = credentials,
             Expires = expires,
-            Subject = GenerateClaims(users)
+            Subject = GenerateClaims(users, employee)
         };
 
         var token = handler.CreateToken(tokenDescriptor);
         return (handler.WriteToken(token), expires);
     }
 
-    //funcão fora do que user service atende.
-    private ClaimsIdentity GenerateClaims(UserDto users)
+
+    private ClaimsIdentity GenerateClaims(UserDto users, EmployeeResponseDto employee)
     {
         var ci = new ClaimsIdentity("token");
         ci.AddClaim(new Claim(ClaimTypes.NameIdentifier, users.Id.ToString()));
         ci.AddClaim(new Claim(ClaimTypes.Email, users.Email));
-
+        ci.AddClaim(new Claim(ClaimTypes.Name, employee.Name));
         return ci;
     }
 
@@ -90,22 +97,22 @@ public class UserService(AppDbContext appDbContext)
         var existingEmail = await appDbContext.Users
             .AnyAsync(e => e.Email == dataEmployeeEmployeeDto.Email);
 
-        var existingUserCompany =
-            await appDbContext.Users.FirstOrDefaultAsync(e => e.Id == dataEmployeeEmployeeDto.CompanyId);
-        var existingCompany = await appDbContext.Companies.FirstOrDefaultAsync(e => e.Id == dataEmployeeEmployeeDto.CompanyId);
-        
+
+        var existingCompany =
+            await appDbContext.Companies.FirstOrDefaultAsync(e => e.Id == dataEmployeeEmployeeDto.CompanyId);
+
         if (existingEmail)
             throw new ValidationException("This Email can't be used");
 
-        if (existingUserCompany == null)
+        if (existingCompany == null)
         {
             throw new ValidationException("User not Found");
         }
 
-        if (!existingUserCompany.Roles.Contains("admin"))
-        {
-            throw new ValidationException("You don't have permission for create user");
-        }
+        // if (!existingUserCompany.Roles.Contains("admin"))
+        // {
+        //     throw new ValidationException("You don't have permission for create user");
+        // }
 
         await using var transaction = await appDbContext.Database.BeginTransactionAsync();
 
@@ -141,8 +148,7 @@ public class UserService(AppDbContext appDbContext)
                 Job = dataEmployeeEmployeeDto.Job,
                 Matriculation = dataEmployeeEmployeeDto.Matriculation.Value,
                 UserId = createdUser.Id,
-                
-                CompanyId = existingUserCompany.Id,
+                CompanyId = existingCompany.Id,
                 CompanyName = existingCompany.Name,
             };
 

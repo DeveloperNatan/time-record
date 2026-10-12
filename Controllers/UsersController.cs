@@ -21,7 +21,8 @@ namespace TimeRecord.Controllers
             {
                 authenticated = true,
                 email = User.FindFirst(ClaimTypes.Email)?.Value,
-                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                name = User.FindFirst(ClaimTypes.Name)?.Value
             });
         }
 
@@ -57,7 +58,6 @@ namespace TimeRecord.Controllers
         }
 
         [HttpPost("register/employee")]
-        [Authorize]
         [SwaggerOperation(
             Summary = "Registers an employee user.",
             Description =
