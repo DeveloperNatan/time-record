@@ -46,6 +46,7 @@ public class UserService(AppDbContext appDbContext)
         var employee = new EmployeeResponseDto()
         {
             Name = employeeName.Name,
+            Job = employeeName.Job,
         };
 
 
@@ -88,6 +89,7 @@ public class UserService(AppDbContext appDbContext)
         ci.AddClaim(new Claim(ClaimTypes.NameIdentifier, users.Id.ToString()));
         ci.AddClaim(new Claim(ClaimTypes.Email, users.Email));
         ci.AddClaim(new Claim(ClaimTypes.Name, employee.Name));
+        ci.AddClaim(new Claim(ClaimTypes.Role, employee.Job));
         return ci;
     }
 
