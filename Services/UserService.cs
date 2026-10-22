@@ -111,10 +111,7 @@ public class UserService(AppDbContext appDbContext)
             throw new ValidationException("User not Found");
         }
 
-        // if (!existingUserCompany.Roles.Contains("admin"))
-        // {
-        //     throw new ValidationException("You don't have permission for create user");
-        // }
+        
 
         await using var transaction = await appDbContext.Database.BeginTransactionAsync();
 
