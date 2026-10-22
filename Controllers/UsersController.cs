@@ -22,7 +22,8 @@ namespace TimeRecord.Controllers
                 authenticated = true,
                 email = User.FindFirst(ClaimTypes.Email)?.Value,
                 userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-                name = User.FindFirst(ClaimTypes.Name)?.Value
+                name = User.FindFirst(ClaimTypes.Name)?.Value,
+                Job = User.FindFirst(ClaimTypes.Role)?.Value,
             });
         }
 
